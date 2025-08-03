@@ -1,4 +1,4 @@
-import { Home, Inbox, Settings } from "lucide-react";
+import { Home, Inbox, Settings, LogOut, Loader2 } from "lucide-react";
 
 import {
   Sidebar,
@@ -11,29 +11,35 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Button } from "./ui/button";
+
+import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
 // Menu items.
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "#home",
     icon: Home,
   },
   {
     title: "Inbox",
-    url: "#",
+    url: "#inbox",
     icon: Inbox,
   },
 ];
 const footerItems = [
   {
     title: "Settings",
-    url: "#",
+    url: "#settings",
     icon: Settings,
   },
 ];
 
 export function AppSidebar() {
+  const { logout } = useAuth();
+  const [isLoading, setIsloading] = useState(false);
   return (
     <Sidebar>
       <SidebarContent>
@@ -66,6 +72,30 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
+          </SidebarMenu>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Button
+                  className="w-full gap-2"
+                  onClick={() => {
+                    setIsloading(true);
+                    setTimeout(() => {
+                      logout();
+                      setIsloading(false);
+                    }, 200);
+                  }}
+                  disabled={isLoading}
+                >
+                  <LogOut />
+                  {isLoading ? (
+                    <Loader2 className="animate-spin w-4 h-4" />
+                  ) : (
+                    "Sign out"
+                  )}
+                </Button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </SidebarContent>
