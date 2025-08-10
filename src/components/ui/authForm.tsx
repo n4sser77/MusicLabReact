@@ -70,7 +70,7 @@ export function AuthForm() {
 
       if (loginRes.status !== 201) setErrorMsg("Failed to login");
 
-      login(res.data.token);
+      login(loginRes.data.token);
       setIsloading(false);
     } catch (error) {
       console.error(error);
