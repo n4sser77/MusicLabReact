@@ -38,7 +38,7 @@ const footerItems = [
 ];
 
 export function AppSidebar() {
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const [isLoading, setIsloading] = useState(false);
   return (
     <Sidebar>
@@ -74,7 +74,7 @@ export function AppSidebar() {
             ))}
           </SidebarMenu>
           <SidebarMenu>
-            <SidebarMenuItem>
+            {isAuthenticated && (
               <SidebarMenuButton asChild>
                 <Button
                   className="w-full gap-2"
@@ -95,7 +95,7 @@ export function AppSidebar() {
                   )}
                 </Button>
               </SidebarMenuButton>
-            </SidebarMenuItem>
+            )}
           </SidebarMenu>
         </SidebarFooter>
       </SidebarContent>

@@ -1,54 +1,36 @@
 import useAudioList from "@/hooks/useAudioList";
-import FileComponent from "./file-component";
-import { AuthForm } from "./authForm";
+import FileComponent, { type FileComponentProps } from "./file-component";
 
-const files = [
-  {
-    title: "Hello world",
-    url: "someUrl",
-    waveBase64: "waveimgBase64",
-  },
-  {
-    title: "Track 2",
-    url: "url track 2",
-    waveBase64: "waveimgBase64",
-  },
-  {
-    title: "Yarens låt",
-    url: "urlgeöoin",
-    waveBase64: "someimg",
-  },
-  {
-    title: "Some song",
-    url: "osing",
-    waveBase64: "ösoigja",
-  },
-  {
-    title: "Some song 2",
-    url: "osing2",
-    waveBase64: "ösoigja2",
-  },
-];
+import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
+import { useAuth } from "@/contexts/AuthContext";
+
+
 
 export default function Dashboard() {
-  
+  const { userId } = useAuth();
+  const { audioFiles, loading, error } = useAudioList(null);
+  console.log("audiofiles: ",audioFiles)
   return (
-    <div className="flex flex-col items-center justify-center p-4">
-      <div className="w-full space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {files.map((item) => (
-            <FileComponent
-              key={item.id}
-              title={item.title}
-              url={item.url}
-              waveBase64={item.waveBase64}
-              id={item.id}
-              bpm={item.bpm}
-              genre={item.genre}
-            />
-          ))}
+    <AudioPlayerProvider>
+      <div className="flex flex-col items-center justify-center p-4">
+        <div className="w-full space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading && <p>Loading...</p>}
+            {error && <p>Error: {error}</p>}
+            {audioFiles.map((item: FileComponentProps, index: number) => (
+              <FileComponent
+                key={index}
+                title={item.title}
+                filepath={item.filepath}
+                waveBase64={item.waveBase64}
+                id={item.id}
+                bpm={item.bpm}
+                genre={item.genre}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </AudioPlayerProvider>
   );
 }

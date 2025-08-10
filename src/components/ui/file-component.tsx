@@ -2,26 +2,31 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause } from "lucide-react";
-import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 
 export interface FileComponentProps {
   title: string;
-  url: string;
+  filepath: string;
   waveBase64: string;
-  bpm:number;
+  bpm: number;
   genre: string;
   id: number;
 }
 
 export default function FileComponent(track: FileComponentProps) {
   const { isPlaying, currentUrl, togglePlay } = useAudioPlayer();
+  console.log("track props: ", track);
 
   return (
-    <Card>
+    <Card className="w-full max-w-lg">
+      {" "}
+      {/* Make the card wider and responsive */}
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-base font-semibold">{track.title}</CardTitle>
+        <CardTitle className="text-base font-semibold break-words max-w-full whitespace-normal">
+          {track.title}
+        </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6 ">
+      <CardContent className="flex flex-col gap-6">
         <div className="w-full h-20 bg-secondary rounded-md flex items-center justify-center text-muted-foreground p-7">
           Waveform
           {/* <img src="" className="p-5" alt="placeholder" /> */}
@@ -31,9 +36,9 @@ export default function FileComponent(track: FileComponentProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => togglePlay(track.url)}
+            onClick={() => togglePlay(track.filepath)}
           >
-            {isPlaying && currentUrl === track.url ? (
+            {isPlaying && currentUrl === track.filepath ? (
               <Pause className="h-4 w-4" />
             ) : (
               <Play className="h-4 w-4" />
