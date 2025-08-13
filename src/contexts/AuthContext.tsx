@@ -25,17 +25,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(getToken());
-  // const [userId, setUserId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   const userIdFromToken = getUserIdFromToken();
-  //   console.log("userIdFromToken", userIdFromToken);
-  //   // setUserId(userIdFromToken);
-  //   console.log("user id is set")
+  useEffect(() => {
+    const userIdFromToken = getUserIdFromToken();
+    console.log("userIdFromToken", userIdFromToken);
+    // setUserId(userIdFromToken);
+    console.log("user id is set")
     
-  // }, [token]);
+  }, [token]);
 
-  // useEffect(() => console.log(" second effect UserId", userId))
+  useEffect(() => console.log(" second effect UserId", userId))
 
   const login = (newToken: string) => {
     setToken(newToken);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, login, logout, isAuthenticated: !!token }}
+      value={{ userId,token, login, logout, isAuthenticated: !!token }}
     >
       {children}
     </AuthContext.Provider>

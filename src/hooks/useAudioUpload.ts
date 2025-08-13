@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import supabase from "@/utils/supabase";
+
 import { useState } from "react";
 
 export default function useAudioUpload() {
@@ -20,7 +20,7 @@ export default function useAudioUpload() {
       formData.append("bpm", "0");
       formData.append("genre", "");
       formData.append("filepath", file.name);
-      formData.append("waveformImageBase64", "");
+      formData.append("waveFormImageBase64", "");
 
       // public int Id { get; set; }
       // public string Title { get; set; }

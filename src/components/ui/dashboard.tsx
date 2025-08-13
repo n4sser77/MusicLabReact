@@ -1,15 +1,13 @@
-import useAudioList from "@/hooks/useAudioList";
+import { useAudioList } from "@/contexts/AudioListContext";
 import FileComponent, { type FileComponentProps } from "./file-component";
 
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { useAuth } from "@/contexts/AuthContext";
 
-
-
 export default function Dashboard() {
   const { userId } = useAuth();
-  const { audioFiles, loading, error } = useAudioList(null);
-  console.log("audiofiles: ",audioFiles)
+  const { audioFiles, loading, error } = useAudioList();
+  console.log("audiofiles: ", audioFiles);
   return (
     <AudioPlayerProvider>
       <div className="flex flex-col items-center justify-center p-4">
@@ -22,7 +20,7 @@ export default function Dashboard() {
                 key={index}
                 title={item.title}
                 filepath={item.filepath}
-                waveBase64={item.waveBase64}
+                waveFormImageBase64={item.waveFormImageBase64}
                 id={item.id}
                 bpm={item.bpm}
                 genre={item.genre}

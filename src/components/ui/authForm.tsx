@@ -64,11 +64,11 @@ export function AuthForm() {
 
     try {
       const res = await api.post("/auth/signup", { email, password });
-      if (res.status !== 201) setErrorMsg("Failed to sign up");
+      if (res.status !== 200) setErrorMsg("Failed to sign up");
 
       const loginRes = await api.post("/auth/login/", { email, password });
 
-      if (loginRes.status !== 201) setErrorMsg("Failed to login");
+      if (loginRes.status !== 200) setErrorMsg("Failed to login");
 
       login(loginRes.data.token);
       setIsloading(false);
