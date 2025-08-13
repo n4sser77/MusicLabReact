@@ -1,3 +1,4 @@
+import { buildAudioStreamUrl } from "@/helpers/buildAudioStreamUrl";
 import {
   useEffect,
   useRef,
@@ -11,6 +12,8 @@ import {
 interface AudioPlayerContextType {
   isPlaying: boolean;
   currentUrl: string | null;
+  duration: number;
+  currentTime: number;
   togglePlay: (url: string) => void;
 }
 
@@ -18,6 +21,8 @@ interface AudioPlayerContextType {
 const AudioPlayerContext = createContext<AudioPlayerContextType>({
   isPlaying: false,
   currentUrl: null,
+  duration: 0,
+  currentTime: 0,
   togglePlay: () => {},
 });
 
@@ -26,17 +31,25 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
-  
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
     const audio = new Audio();
     audioRef.current = audio;
 
     const onEnded = () => setIsPlaying(false);
+    const onLoadedMetadata = () => setDuration(audio.duration);
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+
     audio.addEventListener("ended", onEnded);
+    audio.addEventListener("loadedmetadata", onLoadedMetadata);
+    audio.addEventListener("timeupdate", onTimeUpdate);
 
     return () => {
       audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("loadedmetadata", onLoadedMetadata);
+      audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.pause();
     };
   }, []);
@@ -47,6 +60,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
 
     if (url !== currentUrl) {
       audio.src = url;
+      audio.load();
       setCurrentUrl(url);
     }
 
@@ -59,35 +73,22 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     setIsPlaying(false);
   };
 
-  const baseUrl = "http://localhost:5106/api/audio/stream";
+  const togglePlay = (relativePath: string) => {
+    if (!audioRef.current) return;
+    const fullUrl = buildAudioStreamUrl(relativePath);
+    
 
-const togglePlay = (relativePath: string) => {
-  if (!audioRef.current) return;
-
-  const parts = relativePath.split('/');
-  if (parts.length !== 2) {
-    console.error("Invalid relative path format");
-    return;
-  }
-
-  const userDir = parts[0]; // e.g. "user_6"
-  const fileName = parts[1]; // e.g. "February_5th_108BPM.m4a"
-
-  // Extract userId from userDir by removing "user_" prefix
-  const userId = userDir.replace("user_", "");
-
-  // Construct the full streaming URL
-  const url = `${baseUrl}/${userId}/${encodeURIComponent(fileName)}`;
-
-  if (currentUrl === url && isPlaying) {
-    pause();
-  } else {
-    play(url);
-  }
-};
+    if (currentUrl === fullUrl && isPlaying) {
+      pause();
+    } else {
+      play(fullUrl);
+    }
+  };
 
   return (
-    <AudioPlayerContext value={{ isPlaying, currentUrl, togglePlay }}>
+    <AudioPlayerContext
+      value={{ isPlaying, currentUrl, togglePlay, duration, currentTime }}
+    >
       {children}
     </AudioPlayerContext>
   );
