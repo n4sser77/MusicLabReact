@@ -1,4 +1,5 @@
 import { buildAudioStreamUrl } from "@/helpers/buildAudioStreamUrl";
+import api from "@/lib/api";
 import {
   useEffect,
   useRef,
@@ -7,6 +8,7 @@ import {
   useContext,
   type ReactNode,
 } from "react";
+import { useAuth } from "./AuthContext";
 
 // 1. Define context type
 interface AudioPlayerContextType {
@@ -26,6 +28,7 @@ const AudioPlayerContext = createContext<AudioPlayerContextType>({
   togglePlay: () => {},
 });
 
+type blobItem = { blob: Blob; url: string };
 // 3. AudioPlayerProvider wraps around children and provides the value
 export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -33,6 +36,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const { getSignedUrl } = useAuth();
 
   useEffect(() => {
     const audio = new Audio();
@@ -54,14 +58,25 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const play = (url: string) => {
+  const play = async (fullUrl: string) => {
     const audio = audioRef.current;
-    if (!audio) return;
 
-    if (url !== currentUrl) {
-      audio.src = url;
+    if (!audio) return;
+    if (!fullUrl) return;
+
+    const addSigToUrl = async (url: string) => {
+      const parts = url.split("/");
+      const fileName = parts[parts.length - 1];
+      const signedUrl = await getSignedUrl(fileName);
+      return signedUrl;
+    };
+
+    if (fullUrl !== currentUrl) {
+      const newUrl = await addSigToUrl(fullUrl);
+      console.log("new url:", newUrl);
+      audio.src = newUrl;
       audio.load();
-      setCurrentUrl(url);
+      setCurrentUrl(fullUrl);
     }
 
     audio.play();
@@ -73,16 +88,16 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     setIsPlaying(false);
   };
 
-  const togglePlay = (relativePath: string) => {
+  const togglePlay = async (relativePath: string) => {
     if (!audioRef.current) return;
     const fullUrl = buildAudioStreamUrl(relativePath);
-    
 
     if (currentUrl === fullUrl && isPlaying) {
       pause();
-    } else {
-      play(fullUrl);
+      return;
     }
+
+    play(fullUrl);
   };
 
   return (
