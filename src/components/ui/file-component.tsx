@@ -6,8 +6,6 @@ import {
   Pause,
   EllipsisVertical,
   Download,
-  DeleteIcon,
-  Delete,
   Edit,
   Trash,
 } from "lucide-react";
@@ -26,6 +24,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItemIndicator,
 } from "@radix-ui/react-dropdown-menu";
+import { useDeleteAudio } from "@/hooks/useAudioDelete";
+import { useDownloadAudio } from "@/hooks/useDownloadAudio";
 
 export interface FileComponentProps {
   title: string;
@@ -39,6 +39,8 @@ export interface FileComponentProps {
 export default function FileComponent(track: FileComponentProps) {
   const { isPlaying, currentUrl, togglePlay, duration, currentTime } =
     useAudioPlayer();
+  const { deleteFile } = useDeleteAudio();
+  const { downloadFile, isDownloading, errorDownloading } = useDownloadAudio();
 
   const fullUrl = buildAudioStreamUrl(track.filepath);
 
@@ -50,27 +52,37 @@ export default function FileComponent(track: FileComponentProps) {
         <CardTitle className="text-base font-semibold break-words max-w-full whitespace-normal">
           {track.title}
         </CardTitle>
-        <DropdownMenu >
-          <DropdownMenuTrigger asChild >
-            <Button variant="ghost" size="icon" className="size-8">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="link" size="icon" className="size-8">
               <EllipsisVertical />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuGroup>
               <DropdownMenuItem className="flex items-center justify-between">
-                <span className="font-medium">Edit</span>
+                <Button variant="link" className="font-medium">
+                  Edit
+                </Button>
                 <Edit />
               </DropdownMenuItem>
 
               <DropdownMenuItem className="flex items-center justify-between">
-                <span className="text-red-500 font-medium">Delete</span>
-                <Trash/>
+                <Button
+                  variant="link"
+                  onClick={() => deleteFile(track.id)}
+                  className="text-red-500 font-medium"
+                >
+                  Delete
+                </Button>
+                <Trash />
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="flex items-center justify-between">
-              <span className=" font-medium">Download</span>
+              <Button onClick={() => downloadFile(fullUrl, track.title)} variant="link" className=" font-medium">
+                Download
+              </Button>
               <Download />
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -93,7 +105,7 @@ export default function FileComponent(track: FileComponentProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => togglePlay(track.filepath)}
+            onClick={async() => await togglePlay(track.filepath)}
           >
             {playingThisTrack ? (
               <Pause className="h-4 w-4" />

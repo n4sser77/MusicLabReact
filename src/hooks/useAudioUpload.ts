@@ -1,3 +1,4 @@
+import { useAudioList } from "@/contexts/AudioListContext";
 import api from "@/lib/api";
 
 import { useState } from "react";
@@ -5,6 +6,7 @@ import { useState } from "react";
 export default function useAudioUpload() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const {triggerRefetch} = useAudioList();
 
   const uploadFile = async (file: File, userId: string) => {
     setUploading(true);
@@ -41,6 +43,7 @@ export default function useAudioUpload() {
       });
 
       setUploading(false);
+      triggerRefetch();
       return res.data;
 
       if (error) throw error;
