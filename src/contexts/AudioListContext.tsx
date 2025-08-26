@@ -33,7 +33,7 @@ export const AudioListProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true); // start loading before fetching
 
       try {
-        const res = await api.get(`audios/`);
+        const res = await api.get(`audios`);
         console.log("API response status:", res.status);
         console.log("API response data:", res.data);
 

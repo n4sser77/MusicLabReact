@@ -1,7 +1,7 @@
 // helpers/audio.js
 export function buildAudioStreamUrl(filepath: string): string {
   // const baseUrl = "http://localhost:5106/api/audio/stream";
-  const baseUrlNetwork = "http://localhost:5106/api/audios";
+  const baseUrlNetwork = import.meta.env.VITE_API_ENDPOINT_DEV;
   if (!filepath) {
     console.error("Filepath is missing");
     return "faild to construct url";
