@@ -37,7 +37,7 @@ export default function useAudioUpload() {
         console.log(key, value);
       }
 
-      const res = await api.post("files/uploadfile", formData, {
+      const res = await api.post("/files/uploadfile", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
