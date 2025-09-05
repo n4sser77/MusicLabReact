@@ -1,5 +1,4 @@
 import { buildAudioStreamUrl } from "@/helpers/buildAudioStreamUrl";
-import api from "@/lib/api";
 import {
   useEffect,
   useRef,
@@ -28,7 +27,6 @@ const AudioPlayerContext = createContext<AudioPlayerContextType>({
   togglePlay: () => {},
 });
 
-type blobItem = { blob: Blob; url: string };
 // 3. AudioPlayerProvider wraps around children and provides the value
 export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -110,6 +108,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
 };
 
 // 4. Custom hook to consume the context
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAudioPlayer = () => {
   return useContext(AudioPlayerContext);
 };

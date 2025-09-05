@@ -4,7 +4,7 @@ import { getToken } from "@/utils/token";
 
 const api = axios.create({
   // baseURL: "http://localhost:5106/api",
-  baseURL: import.meta.env.VITE_API_ENDPOINT_DEV + "/api"
+  baseURL: import.meta.env.VITE_API_ENDPOINT + "/api",
 });
 
 api.interceptors.request.use((config) => {

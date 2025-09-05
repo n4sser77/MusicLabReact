@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const userIdFromToken = getUserIdFromToken();
     console.log("userIdFromToken", userIdFromToken);
-    // setUserId(userIdFromToken);
+    setUserId(userIdFromToken);
     console.log("user id is set");
   }, [token]);
 
@@ -42,34 +42,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storageKey = `signedUrl-${fileName}`;
 
     // 1. Check localStorage first
-const cachedUrl = localStorage.getItem(storageKey);
-if (cachedUrl) {
-  try {
-    const url = new URL(cachedUrl);
-    const expiresParam = url.searchParams.get("exp");
+    const cachedUrl = localStorage.getItem(storageKey);
+    if (cachedUrl) {
+      try {
+        const url = new URL(cachedUrl);
+        const expiresParam = url.searchParams.get("exp");
 
-    if (expiresParam) {
-      const expiresUnix = parseInt(expiresParam, 10) * 1000; // convert to ms
-      const now = Date.now();
+        if (expiresParam) {
+          const expiresUnix = parseInt(expiresParam, 10) * 1000; // convert to ms
+          const now = Date.now();
 
-      if (now < expiresUnix) {
-        console.log("Using cached signed URL:", cachedUrl);
-        return cachedUrl;
-      } else {
-        console.log("Cached signed URL expired, removing...");
+          if (now < expiresUnix) {
+            console.log("Using cached signed URL:", cachedUrl);
+            return cachedUrl;
+          } else {
+            console.log("Cached signed URL expired, removing...");
+            localStorage.removeItem(storageKey);
+          }
+        } else {
+          // If no Expires param, assume invalid and clear it
+          console.log("Cached signed URL missing expiry, removing...");
+          localStorage.removeItem(storageKey);
+        }
+      } catch (err) {
+        console.warn("Invalid cached signed URL, removing...");
         localStorage.removeItem(storageKey);
+        console.error(err);
       }
-    } else {
-      // If no Expires param, assume invalid and clear it
-      console.log("Cached signed URL missing expiry, removing...");
-      localStorage.removeItem(storageKey);
     }
-  } catch (err) {
-    console.warn("Invalid cached signed URL, removing...");
-    localStorage.removeItem(storageKey);
-  }
-}
-
 
     // 2. If not in cache, request from backend
     try {
@@ -120,6 +120,7 @@ if (cachedUrl) {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within AuthProvider");

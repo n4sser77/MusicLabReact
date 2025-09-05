@@ -5,12 +5,13 @@ import { useState } from "react";
 
 export default function useAudioUpload() {
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const {triggerRefetch} = useAudioList();
+  const [error, setError] = useState<
+    ReferenceError | TypeError | SyntaxError | undefined
+  >(undefined);
+  const { triggerRefetch } = useAudioList();
 
   const uploadFile = async (file: File, userId: string) => {
     setUploading(true);
-    setError(null);
 
     try {
       const formData = new FormData();
@@ -45,13 +46,11 @@ export default function useAudioUpload() {
       setUploading(false);
       triggerRefetch();
       return res.data;
+    } catch (err: unknown) {
+      if (err instanceof ReferenceError) {
+        setError(err);
+      }
 
-      if (error) throw error;
-
-      setUploading(false);
-      return data; // Contains the file path, etc.
-    } catch (err: any) {
-      setError(err.message);
       setUploading(false);
       return null;
     }

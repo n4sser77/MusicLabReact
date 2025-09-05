@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,17 +12,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { formatTime } from "@/helpers/formatTime";
 import { buildAudioStreamUrl } from "@/helpers/buildAudioStreamUrl";
-import {
-  DropdownMenuGroup,
-  DropdownMenuItemIndicator,
-} from "@radix-ui/react-dropdown-menu";
+import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
 import { useDeleteAudio } from "@/hooks/useAudioDelete";
 import { useDownloadAudio } from "@/hooks/useDownloadAudio";
 
@@ -40,7 +35,7 @@ export default function FileComponent(track: FileComponentProps) {
   const { isPlaying, currentUrl, togglePlay, duration, currentTime } =
     useAudioPlayer();
   const { deleteFile } = useDeleteAudio();
-  const { downloadFile, isDownloading, errorDownloading } = useDownloadAudio();
+  const { downloadFile } = useDownloadAudio();
 
   const fullUrl = buildAudioStreamUrl(track.filepath);
 
@@ -80,7 +75,11 @@ export default function FileComponent(track: FileComponentProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="flex items-center justify-between">
-              <Button onClick={() => downloadFile(fullUrl, track.title)} variant="link" className=" font-medium">
+              <Button
+                onClick={() => downloadFile(track.title)}
+                variant="link"
+                className=" font-medium"
+              >
                 Download
               </Button>
               <Download />
@@ -105,7 +104,7 @@ export default function FileComponent(track: FileComponentProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={async() => await togglePlay(track.filepath)}
+            onClick={async () => await togglePlay(track.filepath)}
           >
             {playingThisTrack ? (
               <Pause className="h-4 w-4" />

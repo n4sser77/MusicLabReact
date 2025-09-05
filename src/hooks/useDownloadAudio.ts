@@ -4,12 +4,13 @@ import { useState } from "react";
 
 export const useDownloadAudio = () => {
   const [isDownloading, setIsDownloading] = useState(false);
-  const [errorDownloading, setErrorDownloading] = useState(null);
+  const [errorDownloading, setErrorDownloading] = useState<
+    ReferenceError | TypeError | SyntaxError | undefined
+  >();
   const { getSignedUrl } = useAuth();
 
-  const downloadFile = async (url: string, fileName: string) => {
+  const downloadFile = async ( fileName: string) => {
     setIsDownloading(true);
-    setErrorDownloading(null);
 
     try {
       // 1. Make an authenticated GET request using the pre-configured 'api' instance.
@@ -39,9 +40,9 @@ export const useDownloadAudio = () => {
 
       // 6. Clean up the temporary URL to free up memory.
       URL.revokeObjectURL(blobUrl);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Download failed:", e);
-      setErrorDownloading(e.message);
+      if (e instanceof ReferenceError) setErrorDownloading(e);
     } finally {
       setIsDownloading(false);
     }

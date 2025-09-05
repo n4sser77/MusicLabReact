@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import useAudioUpload from "@/hooks/useAudioUpload";
 import { getToken, getUserIdFromToken } from "@/utils/token";
 
@@ -12,7 +12,9 @@ export function InvisibleFileDropProvider({
   const { uploadFile } = useAudioUpload();
   const tokenFromStorage = getToken();
 
-  const [userId, setUserId] = useState<string | null>(tokenFromStorage ? getUserIdFromToken() : null);
+  const [userId] = useState<string | null>(
+    tokenFromStorage ? getUserIdFromToken() : null
+  );
   useEffect(() => {
     if (!userId) {
       console.warn(
