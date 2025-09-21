@@ -94,8 +94,6 @@ export function AuthForm() {
       </CardHeader>
       <CardContent>
         <form>
-          <h1>{import.meta.env.MODE}</h1>
-          <h2>api : {import.meta.env.VITE_API_ENDPOINT}</h2>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
