@@ -5,12 +5,12 @@ import api from "@/lib/api";
 import { useState } from "react";
 
 export default function useAudioUpdate() {
-  const [updating, setUpdating] = useState(false);
+  
   const [error, setError] = useState<Error | undefined>(undefined);
   const { triggerRefetch } = useAudioList();
 
   const updateFile = async (trackData: EditableAudioData) => {
-    setUpdating(true);
+    
     setError(undefined);
 
     const dataToSend = {
@@ -22,7 +22,7 @@ export default function useAudioUpdate() {
     try {
       const res = await api.put(`/audios/${trackData.id}`, dataToSend);
 
-      setUpdating(false);
+      
 
       triggerRefetch();
 
@@ -34,10 +34,10 @@ export default function useAudioUpdate() {
         setError(new Error("An unknown error occurred during update."));
       }
 
-      setUpdating(false);
+      
       throw err;
     }
   };
 
-  return { updateFile, updating, error };
+  return { updateFile, error };
 }

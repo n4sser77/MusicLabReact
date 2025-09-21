@@ -30,7 +30,7 @@ export default function EditAudioDialog({ initialData }: EditAudioDialogProps) {
   const [formData, setFormData] = useState<EditableAudioData>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { updateFile, updating, error } = useAudioUpdate();
+  const { updateFile, error } = useAudioUpdate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -75,6 +75,7 @@ export default function EditAudioDialog({ initialData }: EditAudioDialogProps) {
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Edit Audio Track</DialogTitle>
+
             <DialogDescription>
               Update the metadata for the file {initialData.title}.
               {error?.message}
