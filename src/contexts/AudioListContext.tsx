@@ -1,4 +1,4 @@
-import { type FileComponentProps } from "@/components/ui/file-component";
+import { type FileComponentProps } from "@/Types";
 import api from "@/lib/api";
 
 import {

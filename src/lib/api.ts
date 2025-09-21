@@ -7,6 +7,8 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_ENDPOINT + "/api",
 });
 
+
+
 api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {

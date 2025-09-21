@@ -1,13 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  Play,
-  Pause,
-  EllipsisVertical,
-  Download,
-  Edit,
-  Trash,
-} from "lucide-react";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Play, Pause, EllipsisVertical, Download, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,15 +20,9 @@ import { buildAudioStreamUrl } from "@/helpers/buildAudioStreamUrl";
 import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
 import { useDeleteAudio } from "@/hooks/useAudioDelete";
 import { useDownloadAudio } from "@/hooks/useDownloadAudio";
-
-export interface FileComponentProps {
-  title: string;
-  filepath: string;
-  waveFormImageBase64: string;
-  bpm: number;
-  genre: string;
-  id: number;
-}
+import EditAudioDialog from "@/components/EditAudioDialog";
+import type { EditableAudioData } from "@/components/EditAudioDialog";
+import type { FileComponentProps } from "../../Types";
 
 export default function FileComponent(track: FileComponentProps) {
   const { isPlaying, currentUrl, togglePlay, duration, currentTime } =
@@ -41,27 +34,38 @@ export default function FileComponent(track: FileComponentProps) {
 
   const playingThisTrack = currentUrl === fullUrl && isPlaying;
 
+  const initialDialogData: EditableAudioData = {
+    id: track.id,
+    title: track.title,
+    bpm: track.bpm,
+    genre: track.genre,
+  };
+
   return (
     <Card className="w-full max-w-lg">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-semibold break-words max-w-full whitespace-normal">
           {track.title}
         </CardTitle>
+        <CardDescription>
+          <span>Bpm: {track.bpm}</span>
+          <hr></hr>
+          <span>Genre: {track.genre}</span>
+        </CardDescription>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="link" size="icon" className="size-8">
+            <Button variant="outline" size="icon" className="size-8">
               <EllipsisVertical />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuGroup>
-              <DropdownMenuItem className="flex items-center justify-between">
-                <Button variant="link" className="font-medium">
-                  Edit
-                </Button>
-                <Edit />
+              <DropdownMenuItem
+                onSelect={(e) => e.preventDefault()} // prevents auto-close
+              >
+                <EditAudioDialog initialData={initialDialogData} />
               </DropdownMenuItem>
-
               <DropdownMenuItem className="flex items-center justify-between">
                 <Button
                   variant="link"

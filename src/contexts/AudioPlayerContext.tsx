@@ -7,9 +7,8 @@ import {
   useContext,
   type ReactNode,
 } from "react";
-import { useAuth } from "./AuthContext";
+import api from "@/lib/api"; // axios instance
 
-// 1. Define context type
 interface AudioPlayerContextType {
   isPlaying: boolean;
   currentUrl: string | null;
@@ -18,7 +17,6 @@ interface AudioPlayerContextType {
   togglePlay: (url: string) => void;
 }
 
-// 2. Create the context with a default dummy fallback
 const AudioPlayerContext = createContext<AudioPlayerContextType>({
   isPlaying: false,
   currentUrl: null,
@@ -27,87 +25,98 @@ const AudioPlayerContext = createContext<AudioPlayerContextType>({
   togglePlay: () => {},
 });
 
-// 3. AudioPlayerProvider wraps around children and provides the value
 export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const { getSignedUrl } = useAuth();
+
+  // local derived state from element
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const lastObjectUrl = useRef<string | null>(null);
 
   useEffect(() => {
     const audio = new Audio();
     audioRef.current = audio;
 
-    const onEnded = () => setIsPlaying(false);
-    const onLoadedMetadata = () => setDuration(audio.duration);
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const syncState = () => {
+      if (!audioRef.current) return;
+      setIsPlaying(!audioRef.current.paused && !audioRef.current.ended);
+      setDuration(audioRef.current.duration || 0);
+      setCurrentTime(audioRef.current.currentTime || 0);
+    };
 
-    audio.addEventListener("ended", onEnded);
-    audio.addEventListener("loadedmetadata", onLoadedMetadata);
-    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("play", syncState);
+    audio.addEventListener("pause", syncState);
+    audio.addEventListener("ended", syncState);
+    audio.addEventListener("timeupdate", syncState);
+    audio.addEventListener("loadedmetadata", syncState);
 
     return () => {
-      audio.removeEventListener("ended", onEnded);
-      audio.removeEventListener("loadedmetadata", onLoadedMetadata);
-      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("play", syncState);
+      audio.removeEventListener("pause", syncState);
+      audio.removeEventListener("ended", syncState);
+      audio.removeEventListener("timeupdate", syncState);
+      audio.removeEventListener("loadedmetadata", syncState);
       audio.pause();
+      if (lastObjectUrl.current) {
+        URL.revokeObjectURL(lastObjectUrl.current);
+      }
     };
   }, []);
 
-  const play = async (fullUrl: string) => {
+  const play = async (relativePath: string) => {
     const audio = audioRef.current;
-
     if (!audio) return;
-    if (!fullUrl) return;
 
-    const addSigToUrl = async (url: string) => {
-      const parts = url.split("/");
-      const fileName = parts[parts.length - 1];
-      const signedUrl = await getSignedUrl(fileName);
-      return signedUrl;
-    };
+    const url = buildAudioStreamUrl(relativePath);
 
-    if (fullUrl !== currentUrl) {
-      const newUrl = await addSigToUrl(fullUrl);
-      console.log("new url:", newUrl);
-      audio.src = newUrl;
+    if (url !== currentUrl) {
+      const response = await api.get(url, { responseType: "blob" });
+
+      if (lastObjectUrl.current) {
+        URL.revokeObjectURL(lastObjectUrl.current);
+      }
+
+      const objectUrl = URL.createObjectURL(response.data);
+      lastObjectUrl.current = objectUrl;
+
+      audio.src = objectUrl;
       audio.load();
-      setCurrentUrl(fullUrl);
+      setCurrentUrl(url);
     }
 
-    audio.play();
-    setIsPlaying(true);
+    await audio.play();
   };
 
   const pause = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0; // rewind to start
+    }
   };
 
   const togglePlay = async (relativePath: string) => {
-    if (!audioRef.current) return;
-    const fullUrl = buildAudioStreamUrl(relativePath);
+    const url = buildAudioStreamUrl(relativePath);
 
-    if (currentUrl === fullUrl && isPlaying) {
+    if (currentUrl === url && isPlaying) {
       pause();
       return;
     }
 
-    play(fullUrl);
+    await play(relativePath);
   };
 
   return (
-    <AudioPlayerContext
+    <AudioPlayerContext.Provider
       value={{ isPlaying, currentUrl, togglePlay, duration, currentTime }}
     >
       {children}
-    </AudioPlayerContext>
+    </AudioPlayerContext.Provider>
   );
 };
 
-// 4. Custom hook to consume the context
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAudioPlayer = () => {
   return useContext(AudioPlayerContext);
