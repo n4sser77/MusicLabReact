@@ -13,11 +13,11 @@ export function buildAudioStreamUrl(filepath: string): string {
     ? normalizedFilepath.substring(1).split("/")
     : normalizedFilepath.split("/");
 
-  if (parts.length !== 2 || !parts[0].startsWith("user_")) {
+  if (parts.length !== 2 || !parts[0].startsWith("user-")) {
     console.error("Invalid filepath format:", filepath);
     return "faild to construct url";
   }
 
-  const userId = parts[0].replace("user_", "");
+  const userId = parts[0].replace("user-", "");
   return `${baseUrlNetwork}/${userId}/${encodeURIComponent(parts[1])}`;
 }
